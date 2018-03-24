@@ -49,6 +49,7 @@ class BrowserView:
 
         self.webview_ready = webview_ready
         self.is_fullscreen = False
+        self.is_minimized = False
         self.js_result_semaphores = []
         self.eval_js_lock = Lock()
         self.load_event = Event()
@@ -105,6 +106,9 @@ class BrowserView:
 
         if fullscreen:
             self.toggle_fullscreen()
+            
+        if minimized:
+            self.toggle_minimized()   
 
     def close_window(self, *data):
         while gtk.events_pending():
@@ -176,6 +180,14 @@ class BrowserView:
             self.window.fullscreen()
 
         self.is_fullscreen = not self.is_fullscreen
+ 
+    def toogle_minimized(self):
+        if self.is_minimized:
+            self.window.deiconify()
+        else:
+            self.window.iconify()
+
+        self.is_minimized = not self.is_minimized
 
     def create_file_dialog(self, dialog_type, directory, allow_multiple, save_filename, file_types):
         if dialog_type == FOLDER_DIALOG:
@@ -293,10 +305,10 @@ class BrowserView:
 
 
 def create_window(uid, title, url, width, height, resizable, fullscreen, min_size,
-                  confirm_quit, background_color, debug, js_api, webview_ready):
+                  confirm_quit, background_color, debug, js_api, webview_ready,minimized):
     def create():
         browser = BrowserView(uid, title, url, width, height, resizable, fullscreen, min_size,
-                              confirm_quit, background_color, debug, js_api, webview_ready)
+                              confirm_quit, background_color, debug, js_api, webview_ready,minimized)
         browser.show()
 
     if uid == 'master':
@@ -322,6 +334,11 @@ def toggle_fullscreen(uid):
         BrowserView.instances[uid].toggle_fullscreen()
     glib.idle_add(_toggle_fullscreen)
 
+def toggle_minimized(uid):
+    def _toggle_minimized():
+        BrowserView.instances[uid].toggle_minimized()
+    glib.idle_add(_toggle_minimized)
+    
 
 def get_current_url(uid):
     return BrowserView.instances[uid].get_current_url()
