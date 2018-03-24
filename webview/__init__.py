@@ -179,7 +179,7 @@ def load_html(content, uid='master'):
 
 def create_window(title, url=None, js_api=None, width=800, height=600,
                   resizable=True, fullscreen=False, min_size=(200, 100), strings={}, confirm_quit=False,
-                  background_color='#FFFFFF', debug=False):
+                  background_color='#FFFFFF', debug=False, minimized=False):
     """
     Create a web view window using a native GUI. The execution blocks after this function is invoked, so other
     program logic must be executed in a separate thread.
@@ -214,7 +214,7 @@ def create_window(title, url=None, js_api=None, width=800, height=600,
     _webview_ready.clear()
     gui.create_window(uid, _make_unicode(title), _transform_url(url),
                       width, height, resizable, fullscreen, min_size, confirm_quit,
-                      background_color, debug, js_api, _webview_ready)
+                      background_color, debug, js_api, _webview_ready, minimized)
 
     return uid
 
@@ -273,6 +273,18 @@ def toggle_fullscreen(uid='master'):
     except KeyError:
         raise Exception('Cannot call function: No webview exists with uid: {}'.format(uid))
 
+def toggle_minimized(uid='master'):
+    """
+    Toggle fullscreen mode
+    :param uid: uid of the target instance
+    """
+    try:
+        _webview_ready.wait(5)
+        gui.toggle_minimized(uid)
+    except NameError:
+        raise Exception('Create a web view window first, before invoking this function')
+    except KeyError:
+        raise Exception('Cannot call function: No webview exists with uid: {}'.format(uid))        
 
 def evaluate_js(script, uid='master'):
     """
